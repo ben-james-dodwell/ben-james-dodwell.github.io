@@ -1,4 +1,57 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[A GitHub Pages Blog using Gatsby, covering personal projects relating to Software Development, DevOps, and Cloud Infrastructure.]]></description><link>https://ben-james-dodwell.github.io</link><generator>GatsbyJS</generator><lastBuildDate>Wed, 06 Mar 2024 09:10:31 GMT</lastBuildDate><item><title><![CDATA[The Cloud Resume Challenge]]></title><description><![CDATA[At some point last year, I stumbled upon The Cloud Resume Challenge and saved the link to revisit when I had the chance. To summarise, the…]]></description><link>https://ben-james-dodwell.github.io/the-cloud-resume-challenge/</link><guid isPermaLink="false">https://ben-james-dodwell.github.io/the-cloud-resume-challenge/</guid><pubDate>Wed, 06 Mar 2024 08:12:00 GMT</pubDate><content:encoded>&lt;p&gt;At some point last year, I stumbled upon &lt;a href=&quot;https://cloudresumechallenge.dev/&quot;&gt;The Cloud Resume Challenge&lt;/a&gt; and saved the link to revisit when I had the chance.&lt;/p&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[A GitHub Pages Blog using Gatsby, covering personal projects relating to Software Development, DevOps, and Cloud Infrastructure.]]></description><link>https://ben-james-dodwell.github.io</link><generator>GatsbyJS</generator><lastBuildDate>Wed, 06 Mar 2024 11:12:41 GMT</lastBuildDate><item><title><![CDATA[AWS Account and S3 Static Website]]></title><description><![CDATA[I have a personal AWS account, though it hasn't been used in a long time, so it needed a bit of basic housekeeping. Following the dashboard…]]></description><link>https://ben-james-dodwell.github.io/aws-s3-static-website/</link><guid isPermaLink="false">https://ben-james-dodwell.github.io/aws-s3-static-website/</guid><pubDate>Wed, 06 Mar 2024 10:08:00 GMT</pubDate><content:encoded>&lt;p&gt;I have a personal AWS account, though it hasn&apos;t been used in a long time, so it needed a bit of basic housekeeping. Following the dashboard recommendations, I removed access keys and enabled MFA on the root account, then enabled an IAM Identity Center directory and created myself a separate IAM account for day-to-day usage. MFA is also required for IAM accounts.&lt;/p&gt;
+&lt;p&gt;I anticipate that I will be primarily using the AWS console to familiarise myself with the services and options, but would like to move towards &lt;a href=&quot;https://www.terraform.io/&quot;&gt;Terraform&lt;/a&gt; later.&lt;/p&gt;
+&lt;p&gt;So, the first step is creating an S3 bucket. There are &lt;a href=&quot;https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html?icmpid=docs_amazons3_console&quot;&gt;bucket naming rules&lt;/a&gt; to consider, but the key point being that the name must be globally unique since it will form part of the FQDN used to access it. Next, I&apos;ve configured &lt;a href=&quot;https://docs.aws.amazon.com/AmazonS3/latest/userguide/EnableWebsiteHosting.html&quot;&gt;static website hosting&lt;/a&gt; which provides a website endpoint for the bucket; this is only HTTP and would be better as HTTPS so I will revisit this later.&lt;/p&gt;
+&lt;p&gt;For now, I will upload placeholder HTML so that I can focus on all of the cloud infrastructure and DevOps pipelines first then work on the resume content when the automation is all running.&lt;/p&gt;
+&lt;p&gt;Public access is blocked on a new bucket by default, but for this project it is safe to make public to all, so I have configured a policy as follows:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;json&quot;&gt;&lt;pre class=&quot;language-json&quot;&gt;&lt;code class=&quot;language-json&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;token property&quot;&gt;&quot;Version&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;2012-10-17&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;token property&quot;&gt;&quot;Id&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;BucketPolicy&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;token property&quot;&gt;&quot;Statement&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;
+		&lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;token property&quot;&gt;&quot;Sid&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;AllAccess&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+			&lt;span class=&quot;token property&quot;&gt;&quot;Effect&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;Allow&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+			&lt;span class=&quot;token property&quot;&gt;&quot;Principal&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;*&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+			&lt;span class=&quot;token property&quot;&gt;&quot;Action&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;s3:*&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+			&lt;span class=&quot;token property&quot;&gt;&quot;Resource&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;
+				&lt;span class=&quot;token string&quot;&gt;&quot;arn:aws:s3:::bucket-name-here&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+				&lt;span class=&quot;token string&quot;&gt;&quot;arn:aws:s3:::bucket-name-here/*&quot;&lt;/span&gt;
+			&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;
+		&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And this gives me a publically accessible static website:&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/bb92abce90f757e94692b87554b92452/1d69c/image.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 56.32911392405063%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAALCAYAAAB/Ca1DAAAACXBIWXMAAAsTAAALEwEAmpwYAAABGElEQVR42rWSS0+DUBCF+SvyMLpQ6w60Vyot4KYFSlF/qyuLW5sUtLe6NG5sU7rE8jwCrVGXVpzky5yZ5JxMci/TaByDkDNoug5ZliGKEiTpBKdNgoPDI7C8AG7DT81jh2XBchx4QajY3dsHQ+QWFEWBqqrQ9Qv0LAe2c42u0S/0AJZ9iZ5pw7BsmH2n6AMY9hU6rTY00sR5u1P4NOgmgSgrYG6HLlzXxf1oBM/z8DihoNNnTOgTaEmh6fSzf2nf9+GNx5WnhNIH3AzvwLyvImRZijzPsW1lG+/rfAFmFcXrZZZtTZKmVcbL2xxMFCf4a+XfL0yS+gIXQVBv4HJZc2AQ/EdgGIaIoujXxMXviOM15Vy+9mw2wwfmfQJZTY0P3wAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;S3 Static Website&quot;
+        title=&quot;&quot;
+        src=&quot;/static/bb92abce90f757e94692b87554b92452/f058b/image.png&quot;
+        srcset=&quot;/static/bb92abce90f757e94692b87554b92452/c26ae/image.png 158w,
+/static/bb92abce90f757e94692b87554b92452/6bdcf/image.png 315w,
+/static/bb92abce90f757e94692b87554b92452/f058b/image.png 630w,
+/static/bb92abce90f757e94692b87554b92452/1d69c/image.png 750w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;We&apos;re off to a good start.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[The Cloud Resume Challenge]]></title><description><![CDATA[At some point last year, I stumbled upon The Cloud Resume Challenge and saved the link to revisit when I had the chance. To summarise, the…]]></description><link>https://ben-james-dodwell.github.io/the-cloud-resume-challenge/</link><guid isPermaLink="false">https://ben-james-dodwell.github.io/the-cloud-resume-challenge/</guid><pubDate>Wed, 06 Mar 2024 08:12:00 GMT</pubDate><content:encoded>&lt;p&gt;At some point last year, I stumbled upon &lt;a href=&quot;https://cloudresumechallenge.dev/&quot;&gt;The Cloud Resume Challenge&lt;/a&gt; and saved the link to revisit when I had the chance.&lt;/p&gt;
 &lt;p&gt;To summarise, the challenge has you create your resume (or curriculum vitae) as a web page using HTML, CSS, and JavaScript. Then, using DevOps methodologies and technologies, deploy the resume to a cloud service provider.&lt;/p&gt;
 &lt;p&gt;There are several aspects of the challenge that appeal to me.&lt;/p&gt;
 &lt;p&gt;Firstly, while I wouldn&apos;t consider myself to be a talented web designer due to shortage of artistic ability, I feel that I&apos;ve attained a basic competence from some of my personal projects over the past few years. I like the control over layout and styling that HTML and CSS provides. Being able to use responsive web design techniques seems beneficial, for example, providing a better user experience for anyone that views the resume on a mobile device. Also, having this kind of document under source control seems like it could be useful to at least view change history.&lt;/p&gt;
