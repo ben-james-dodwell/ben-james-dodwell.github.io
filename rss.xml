@@ -1,6 +1,126 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[A GitHub Pages Blog using Gatsby, covering personal projects relating to Software Development, DevOps, and Cloud Infrastructure.]]></description><link>https://ben-james-dodwell.github.io</link><generator>GatsbyJS</generator><lastBuildDate>Wed, 06 Mar 2024 11:12:41 GMT</lastBuildDate><item><title><![CDATA[AWS Account and S3 Static Website]]></title><description><![CDATA[I have a personal AWS account, though it hasn't been used in a long time, so it needed a bit of basic housekeeping. Following the dashboard…]]></description><link>https://ben-james-dodwell.github.io/aws-s3-static-website/</link><guid isPermaLink="false">https://ben-james-dodwell.github.io/aws-s3-static-website/</guid><pubDate>Wed, 06 Mar 2024 10:08:00 GMT</pubDate><content:encoded>&lt;p&gt;I have a personal AWS account, though it hasn&apos;t been used in a long time, so it needed a bit of basic housekeeping. Following the dashboard recommendations, I removed access keys and enabled MFA on the root account, then enabled an IAM Identity Center directory and created myself a separate IAM account for day-to-day usage. MFA is also required for IAM accounts.&lt;/p&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[A GitHub Pages Blog using Gatsby, covering personal projects relating to Software Development, DevOps, and Cloud Infrastructure.]]></description><link>https://ben-james-dodwell.github.io</link><generator>GatsbyJS</generator><lastBuildDate>Thu, 07 Mar 2024 11:03:41 GMT</lastBuildDate><item><title><![CDATA[DNS and HTTPS]]></title><description><![CDATA[Before I begin with the technical work, I want to quickly cover terminology. This project is named The Cloud Resume Challenge but the word…]]></description><link>https://ben-james-dodwell.github.io/dns-and-https/</link><guid isPermaLink="false">https://ben-james-dodwell.github.io/dns-and-https/</guid><pubDate>Thu, 07 Mar 2024 08:56:00 GMT</pubDate><content:encoded>&lt;p&gt;Before I begin with the technical work, I want to quickly cover terminology. This project is named The Cloud Resume Challenge but the word resume is less commonly used in the United Kingdom when compared to Curriculum Vitae or CV. There is a &lt;a href=&quot;https://www.grammarly.com/blog/cv-resume/&quot;&gt;difference&lt;/a&gt; in that a resume should be a summary of relevant experience and skills tailored towards a specific job, whereas a CV is more academically focused and usually a complete history. Resume is probably the more appropriate description of the document that I intend to publish with this project, but nevertheless they are treated almost interchangeably in my country so I will use CV as the more popular term.&lt;/p&gt;
+&lt;p&gt;The reason that terminology is suddenly important, is that I am at a point where I want to configure a custom domain to access my S3 static website. The website endpoint generated for the AWS bucket will be something like bucket-name-here.s3-website.eu-west-2.amazonaws.com which is hard to remember and doesn&apos;t look great.&lt;/p&gt;
+&lt;p&gt;I have registered benjamesdodwell.com and would like to use a subdomain, such as cv.benjamesdodwell.com for this project. Namecheap are the registrar and they provide an email forwarding service that I would like to continue using, but I would also like to use AWS Route 53 to manage DNS for this project. So, my plan is leave Namecheap managing the root domain but create name server (NS) DNS records for the cv subdomain.&lt;/p&gt;
+&lt;p&gt;The first step is to create a public hosted zone in Route 53 for cv.benjamesdodwell.com. This automatically creates start of authority (SOA) and name server (NS) records, and the values of these NS records can then be used for the cv subdomain on Namecheap. Once the records propagate, I&apos;ll have the split control that I&apos;m looking for.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;nslookup -q=ns benjamesdodwell.com
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+Non-authoritative answer:
+benjamesdodwell.com     nameserver = dns1.registrar-servers.com
+benjamesdodwell.com     nameserver = dns2.registrar-servers.com
+
+nslookup -q=ns cv.benjamesdodwell.com
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+Non-authoritative answer:
+cv.benjamesdodwell.com  nameserver = ns-1254.awsdns-28.org
+cv.benjamesdodwell.com  nameserver = ns-1861.awsdns-40.co.uk
+cv.benjamesdodwell.com  nameserver = ns-234.awsdns-29.com
+cv.benjamesdodwell.com  nameserver = ns-926.awsdns-51.net&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;At this stage, I could create an alias (A) record in Route 53 for the cv.benjamesdodwell.com alias to the S3 bucket static website endpoint. However, the static website is still using HTTP and I&apos;d rather use HTTPS as a security best-practice so, to avoid rework, I will deal with this next and revisit the DNS records at the end.&lt;/p&gt;
+&lt;p&gt;In order to enable HTTPS, I will need a certificate, and it seems that &lt;a href=&quot;https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/getting-started-cloudfront-overview.html#getting-started-cloudfront-request-certificate&quot;&gt;AWS Certificate Manager (ACM)&lt;/a&gt; can issue them for free to be used with integrated services such as CloudFront and Elastic Load Balancing.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/a120bd405a8f576a46841823b229d022/b0de5/certificate-route53.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 15.822784810126581%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAADCAYAAACTWi8uAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAfklEQVR42lVOWw7DIAzj/ldt6SiEBArITdJt2j4sPzCGkFJCLgXXdTl6745f/fj/nFmQ0onzzCiF8NId06HW+i0yM8YY7onIs6neWEQw50TR3PTnA9aT1vxeUw6kg1YyQ0J+MN4jxjbyPCZYa2GPEdu2I+esww3xODyLisqMG9yk6S0M71DqAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;AWS Certificate Manager with Route 53 integration&quot;
+        title=&quot;&quot;
+        src=&quot;/static/a120bd405a8f576a46841823b229d022/f058b/certificate-route53.png&quot;
+        srcset=&quot;/static/a120bd405a8f576a46841823b229d022/c26ae/certificate-route53.png 158w,
+/static/a120bd405a8f576a46841823b229d022/6bdcf/certificate-route53.png 315w,
+/static/a120bd405a8f576a46841823b229d022/f058b/certificate-route53.png 630w,
+/static/a120bd405a8f576a46841823b229d022/40601/certificate-route53.png 945w,
+/static/a120bd405a8f576a46841823b229d022/78612/certificate-route53.png 1260w,
+/static/a120bd405a8f576a46841823b229d022/b0de5/certificate-route53.png 1517w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;CloudFront is a content delivery network (CDN) service that is perhaps primarily used to cache content and distribute globally via edge locations that may be more geographically appropriate, which can improve speeds for the consumer. There are other features available, however, such as a web application firewall (WAF) which is probably unnecessary for a static website. CloudFront can also attach a &lt;a href=&quot;https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/getting-started-cloudfront-overview.html#getting-started-cloudfront-distribution&quot;&gt;custom certificate&lt;/a&gt; and redirect HTTP requests to HTTPS which is the main functionality that I&apos;m looking for in this project.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/99bdbdcec64617b3cd3407c3f1100c8e/774b6/cloudfront-certificate.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 34.177215189873415%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAHCAYAAAAIy204AAAACXBIWXMAAA7DAAAOwwHHb6hkAAABGUlEQVR42l2RiW7EIAxE9///sVW1aiDhysUdwtSQ3VQt0tN47GhwxGPkI4SQYAOHlAqMcazrhhACEeG974QYe697Ukdqneu0Wa0V7TyE1JgoaBIaSmk0z0cBPgmMU1N5eWJol20WMWWYZcO2W/peIeeM93l8jjOG2ePbuAtNvP3saObueav5GiH2jC/tsfiMep73dj1QmgXhKAi54KD+ceLSF7n+8zRPpXbar0b6/T+BTzHjgwk85QLlMjQhbaI6dX9jqb+nrmuqmGOFomW0Nii05R1obACjsNGs4GqBWCyYMmB6wTRv1Ceo5sQgDNUrfAEFnrTlb9AduFmLdd/7y51nRSml39i1c778S4njODreX6/+fvGUM34AmhccSqRTQC8AAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;CloudFront with AWS Certificate Manager integration&quot;
+        title=&quot;&quot;
+        src=&quot;/static/99bdbdcec64617b3cd3407c3f1100c8e/f058b/cloudfront-certificate.png&quot;
+        srcset=&quot;/static/99bdbdcec64617b3cd3407c3f1100c8e/c26ae/cloudfront-certificate.png 158w,
+/static/99bdbdcec64617b3cd3407c3f1100c8e/6bdcf/cloudfront-certificate.png 315w,
+/static/99bdbdcec64617b3cd3407c3f1100c8e/f058b/cloudfront-certificate.png 630w,
+/static/99bdbdcec64617b3cd3407c3f1100c8e/774b6/cloudfront-certificate.png 738w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Finally, we can revisit DNS and &lt;a href=&quot;https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/getting-started-cloudfront-overview.html#getting-started-cloudfront-create-alias&quot;&gt;route traffic to our CloudFront distribution endpoint&lt;/a&gt; via our custom domain by creating an A record.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 334px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/2a349ad6c76cd79d377323f8b2ec7232/86d36/valid-certificate.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 75.9493670886076%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAPCAYAAADkmO9VAAAACXBIWXMAAAsTAAALEwEAmpwYAAAClElEQVR42o1T21LiQBDlByxALLYgAUICQgK5EEOuRiKiuPgkX8EDd6v8QP2wY/dEd6so3dqHnkmmpk+fPqensHx+hlSvo91WoLRaaDabaPHeakLTtP8KVVXRaDSwXC5R2G63ULQ+4vQOxsCEaVEMLTiWnQNTgX8FA/V6PZRLZey2OxQ2BGiYHrLZAml2j6enBeZ3czw9LnB52aWkFrFvQ1EUUeA0GPDq6grVahXr9ZoZblD9VUPfsHBJlQI/xHUSw/d9JEmCSZoiiWPEcYKhYQiAU1AuWCwWsdsRw/3hgIuLCjTSQdM66Ha7xKwn9i+NOp3OH62+C75bqVSw3+8JkBb+4SSuJkkS6rW62GWZQ0adTJOJ2U+AnHt+fo4dA3LfDJRlGYamiex2SjHBdDqlNq8RhjFu6Szwx5CpiEQFuEheMP/mlkulEtjgwmazQa1Wg+M4sEwbN5MJAdxiekfAk4x0THE/myGOYnHHtoc0DQYcm+7TJFiWBb3f/6shL+VyWbBkU1zXhU0XndGI3HMxckbw6Mwk9mEUIgh9jIltGIYYj+nb86iITQyLxHCXzyH3z7T1wQDpzQ1Cctj3A0r0hbsRuWzbI0RRAI9AeEzGgS+AXMeFHwaClGiZFzZFJRcNQ4cfjOESM4+SvGSGMJ3BTx/gBhOh4ZdusiSjITdyDRXW8BOQW+b+eerlRu4oP0WJEpokA7vLu9pWxXB/FyzX2dlZruGaTNF1HYvFQmjy+HuO+eMcGbUeRxEeZvfCkNbn2z4dGQZjE/tkDBtcWK1WgiEftFUNA3JwYA5g6H1hkkVmaHTOOl+QNJWT4HMebMZgrMLb25vo/eXlRcSBXs5hT3E84kjBg3+k89fX1x+D8xjj/f0dHxrX3xWkxZe1AAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;Browser showing valid certificate for custom domain&quot;
+        title=&quot;&quot;
+        src=&quot;/static/2a349ad6c76cd79d377323f8b2ec7232/86d36/valid-certificate.png&quot;
+        srcset=&quot;/static/2a349ad6c76cd79d377323f8b2ec7232/c26ae/valid-certificate.png 158w,
+/static/2a349ad6c76cd79d377323f8b2ec7232/6bdcf/valid-certificate.png 315w,
+/static/2a349ad6c76cd79d377323f8b2ec7232/86d36/valid-certificate.png 334w&quot;
+        sizes=&quot;(max-width: 334px) 100vw, 334px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;I have been particularly impressed with the level of integration between AWS services, through these stages of the project. ACM can automatically create Route 53 records to support domain validation during a certificate request. CloudFront will populate origin endpoints to a dropdown and similarly with custom certificates during configuration of a distribution. Route 53 will populate endpoints for an alias into a dropdown. This functionality may sound obvious or mundane, but this level of integration rarely exists with on-premises infrastructure and would typically involve a lot of disjointed manual work which increases the risk of misconfiguration.&lt;/p&gt;
+&lt;p&gt;Next time, I will start to look at some back-end features.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[AWS Account and S3 Static Website]]></title><description><![CDATA[I have a personal AWS account, though it hasn't been used in a long time, so it needed a bit of basic housekeeping. Following the dashboard…]]></description><link>https://ben-james-dodwell.github.io/aws-s3-static-website/</link><guid isPermaLink="false">https://ben-james-dodwell.github.io/aws-s3-static-website/</guid><pubDate>Wed, 06 Mar 2024 10:08:00 GMT</pubDate><content:encoded>&lt;p&gt;I have a personal AWS account, though it hasn&apos;t been used in a long time, so it needed a bit of basic housekeeping. Following the dashboard recommendations, I removed access keys and enabled MFA on the root account, then enabled an IAM Identity Center directory and created myself a separate IAM account for day-to-day usage. MFA is also required for IAM accounts.&lt;/p&gt;
 &lt;p&gt;I anticipate that I will be primarily using the AWS console to familiarise myself with the services and options, but would like to move towards &lt;a href=&quot;https://www.terraform.io/&quot;&gt;Terraform&lt;/a&gt; later.&lt;/p&gt;
-&lt;p&gt;So, the first step is creating an S3 bucket. There are &lt;a href=&quot;https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html?icmpid=docs_amazons3_console&quot;&gt;bucket naming rules&lt;/a&gt; to consider, but the key point being that the name must be globally unique since it will form part of the FQDN used to access it. Next, I&apos;ve configured &lt;a href=&quot;https://docs.aws.amazon.com/AmazonS3/latest/userguide/EnableWebsiteHosting.html&quot;&gt;static website hosting&lt;/a&gt; which provides a website endpoint for the bucket; this is only HTTP and would be better as HTTPS so I will revisit this later.&lt;/p&gt;
+&lt;p&gt;So, the first step is creating an simple storage service (S3) bucket. There are &lt;a href=&quot;https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html?icmpid=docs_amazons3_console&quot;&gt;bucket naming rules&lt;/a&gt; to consider, but the key point being that the name must be globally unique since it will form part of the FQDN used to access it. Next, I&apos;ve configured &lt;a href=&quot;https://docs.aws.amazon.com/AmazonS3/latest/userguide/EnableWebsiteHosting.html&quot;&gt;static website hosting&lt;/a&gt; which provides a website endpoint for the bucket; this is only HTTP and would be better as HTTPS so I will revisit this later.&lt;/p&gt;
 &lt;p&gt;For now, I will upload placeholder HTML so that I can focus on all of the cloud infrastructure and DevOps pipelines first then work on the resume content when the automation is all running.&lt;/p&gt;
 &lt;p&gt;Public access is blocked on a new bucket by default, but for this project it is safe to make public to all, so I have configured a policy as follows:&lt;/p&gt;
 &lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;json&quot;&gt;&lt;pre class=&quot;language-json&quot;&gt;&lt;code class=&quot;language-json&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
@@ -19,7 +139,7 @@
 		&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
 	&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;
 &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;And this gives me a publically accessible static website:&lt;/p&gt;
+&lt;p&gt;And this gives me a publicly accessible static website:&lt;/p&gt;
 &lt;p&gt;&lt;span
       class=&quot;gatsby-resp-image-wrapper&quot;
       style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
